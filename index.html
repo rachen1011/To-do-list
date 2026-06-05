@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kanban Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect width="28" height="28" rx="8" fill="#6366f1"/>
+            <rect x="5" y="8" width="5" height="12" rx="2" fill="white" opacity="0.9"/>
+            <rect x="12" y="5" width="5" height="15" rx="2" fill="white" opacity="0.75"/>
+            <rect x="19" y="10" width="4" height="10" rx="2" fill="white" opacity="0.55"/>
+          </svg>
+          <span>Kanban</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-primary" id="btn-new-task" onclick="openCreateModal()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          New Task
+        </button>
+        <div id="auth-section">
+          <button class="btn btn-google" id="btn-signin" onclick="signIn()">
+            <svg width="16" height="16" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z"/><path fill="#FBBC05" d="M3.964 10.706c-.18-.54-.282-1.117-.282-1.706s.102-1.166.282-1.706V4.962H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+            Sign in with Google
+          </button>
+          <div id="user-info" class="user-info hidden">
+            <img id="user-avatar" src="" alt="" class="avatar" referrerpolicy="no-referrer"/>
+            <span id="user-name"></span>
+            <button class="btn btn-ghost" onclick="signOut()">Sign out</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Board -->
+    <div class="board" id="board">
+      <div class="column" id="col-TODO">
+        <div class="column-header">
+          <div class="column-title">
+            <span class="col-dot" style="background:#3b82f6"></span>
+            <span>To Do</span>
+          </div>
+          <div class="col-meta">
+            <span class="col-count" id="count-TODO">0</span>
+            <button class="col-add" onclick="openCreateModal()" title="Add task">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="column-body" id="tasks-TODO" data-status="TODO"
+          ondragover="onDragOver(event)" ondrop="onDrop(event)" ondragleave="onDragLeave(event)">
+          <div class="empty-state">No tasks</div>
+        </div>
+      </div>
+
+      <div class="column" id="col-DOING">
+        <div class="column-header">
+          <div class="column-title">
+            <span class="col-dot" style="background:#f59e0b"></span>
+            <span>In Progress</span>
+          </div>
+          <div class="col-meta">
+            <span class="col-count" id="count-DOING">0</span>
+          </div>
+        </div>
+        <div class="column-body" id="tasks-DOING" data-status="DOING"
+          ondragover="onDragOver(event)" ondrop="onDrop(event)" ondragleave="onDragLeave(event)">
+          <div class="empty-state">No tasks</div>
+        </div>
+      </div>
+
+      <div class="column" id="col-DONE">
+        <div class="column-header">
+          <div class="column-title">
+            <span class="col-dot" style="background:#10b981"></span>
+            <span>Done</span>
+          </div>
+          <div class="col-meta">
+            <span class="col-count" id="count-DONE">0</span>
+          </div>
+        </div>
+        <div class="column-body" id="tasks-DONE" data-status="DONE"
+          ondragover="onDragOver(event)" ondrop="onDrop(event)" ondragleave="onDragLeave(event)">
+          <div class="empty-state">No tasks</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Task Modal -->
+  <div class="modal-overlay hidden" id="task-modal" onclick="handleOverlayClick(event)">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-title">New Task</h2>
+        <button class="modal-close" onclick="closeModal()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <form id="task-form" class="modal-body" onsubmit="handleFormSubmit(event)">
+        <input type="hidden" id="task-id" />
+
+        <div class="field">
+          <label>Title <span class="required">*</span></label>
+          <input type="text" id="f-title" placeholder="What needs to be done?" required autofocus />
+        </div>
+
+        <div class="field">
+          <label>Description</label>
+          <textarea id="f-desc" rows="3" placeholder="Add more details..."></textarea>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Priority</label>
+            <div class="priority-group" id="priority-group">
+              <button type="button" class="prio-btn" data-p="low" onclick="setPriority('low')">Low</button>
+              <button type="button" class="prio-btn prio-btn-active" data-p="medium" onclick="setPriority('medium')">Medium</button>
+              <button type="button" class="prio-btn" data-p="high" onclick="setPriority('high')">High</button>
+              <button type="button" class="prio-btn" data-p="critical" onclick="setPriority('critical')">Critical</button>
+            </div>
+            <input type="hidden" id="f-priority" value="medium" />
+          </div>
+          <div class="field" id="status-field" style="display:none">
+            <label>Status</label>
+            <select id="f-status">
+              <option value="TODO">To Do</option>
+              <option value="DOING">In Progress</option>
+              <option value="DONE">Done</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Deadline</label>
+            <input type="datetime-local" id="f-deadline" />
+          </div>
+          <div class="field">
+            <label>Estimate (hours)</label>
+            <input type="number" id="f-estimate" placeholder="e.g. 2.5" min="0.5" step="0.5" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Card Color</label>
+          <div class="color-row">
+            <button type="button" class="color-preview-btn" id="color-preview-btn" onclick="toggleColorPicker()"></button>
+            <div class="color-picker hidden" id="color-picker">
+              <button type="button" class="cs" style="background:#6366f1" onclick="setColor('#6366f1')"></button>
+              <button type="button" class="cs" style="background:#8b5cf6" onclick="setColor('#8b5cf6')"></button>
+              <button type="button" class="cs" style="background:#a855f7" onclick="setColor('#a855f7')"></button>
+              <button type="button" class="cs" style="background:#ec4899" onclick="setColor('#ec4899')"></button>
+              <button type="button" class="cs" style="background:#f43f5e" onclick="setColor('#f43f5e')"></button>
+              <button type="button" class="cs" style="background:#f97316" onclick="setColor('#f97316')"></button>
+              <button type="button" class="cs" style="background:#f59e0b" onclick="setColor('#f59e0b')"></button>
+              <button type="button" class="cs" style="background:#10b981" onclick="setColor('#10b981')"></button>
+              <button type="button" class="cs" style="background:#14b8a6" onclick="setColor('#14b8a6')"></button>
+              <button type="button" class="cs" style="background:#3b82f6" onclick="setColor('#3b82f6')"></button>
+              <button type="button" class="cs" style="background:#06b6d4" onclick="setColor('#06b6d4')"></button>
+              <button type="button" class="cs" style="background:#64748b" onclick="setColor('#64748b')"></button>
+              <input type="color" id="f-color-input" title="Custom" onchange="setColor(this.value)" />
+            </div>
+            <span class="color-hex" id="color-hex">#6366f1</span>
+            <input type="hidden" id="f-color" value="#6366f1" />
+          </div>
+        </div>
+
+        <!-- File Attachments -->
+        <div class="field" id="attach-section">
+          <label>
+            Attachments
+            <span class="label-hint" id="attach-hint"></span>
+          </label>
+          <div class="dropzone" id="dropzone"
+            onclick="handleDropzoneClick()"
+            ondragover="handleFileDragOver(event)"
+            ondragleave="handleFileDragLeave(event)"
+            ondrop="handleFileDrop(event)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span id="dropzone-text">Drop files or click to upload to Google Drive</span>
+          </div>
+          <input type="file" id="file-input" multiple style="display:none" onchange="handleFileSelect(event)" />
+          <div class="attachments-list" id="attachments-list"></div>
+        </div>
+
+        <p class="hint" id="new-task-hint" style="display:none">You can attach files after saving the task.</p>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-delete hidden" id="btn-delete" onclick="handleDelete()">Delete Task</button>
+          <div class="modal-actions-right">
+            <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+            <button type="submit" class="btn-save" id="btn-save">Create Task</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast hidden" id="toast"></div>
+
+  <!-- Google APIs -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+  <script src="app.js"></script>
+</body>
+</html>
